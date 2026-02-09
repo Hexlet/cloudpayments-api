@@ -71,13 +71,13 @@ client_settings:
     public_id:
       type: string
       auth:
-        security_scheme: basic
+        security_scheme: BasicAuth
         name: username
       read_env: CLOUDPAYMENTS_PUBLIC_ID
     api_secret:
       type: string
       auth:
-        security_scheme: basic
+        security_scheme: BasicAuth
         name: password
       read_env: CLOUDPAYMENTS_API_SECRET
 
