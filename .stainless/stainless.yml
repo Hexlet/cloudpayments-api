@@ -1,0 +1,152 @@
+# yaml-language-server: $schema=https://app.stainless.com/config.schema.json
+edition: 2026-01-30
+
+organization:
+  # Name of your organization or company, used to determine the name of the client
+  # and headings.
+  name: cloudpayments
+  # Link to your API documentation.
+  docs: ''
+  # Contact email for bug reports, questions, and support requests.
+  contact: ''
+
+# `targets` define the output targets and their customization options, such as
+# whether to emit the Node SDK and what its package name should be.
+targets:
+  # typescript:
+  #   # The edition for this target, see the [docs] for more information.
+  #   #
+  #   # [docs]: https://www.stainless.com/docs/reference/editions
+  #   edition: typescript.2025-10-10
+  #   package_name: cloudpayments
+  #   production_repo: null
+  #   publish:
+  #     npm: false
+  # python:
+  #   edition: python.2025-11-20
+  #   package_name: cloudpayments
+  #   production_repo: null
+  #   publish:
+  #     pypi: false
+  ruby:
+    edition: ruby.2025-10-08
+    gem_name: cloudpayments
+    production_repo: Hexlet/cloudpayments-ruby
+    publish:
+      rubygems: false
+
+# `environments` are a map of the name of the environment (e.g. "sandbox",
+# "production") to the corresponding url to use.
+environments:
+  production: https://api.cloudpayments.ru
+
+# `resources` define the structure and organization for your API, such as how
+# methods and models are grouped together and accessed. See the [configuration
+# guide] for more information.
+#
+# [configuration guide]: https://www.stainless.com/docs/guides/configure#resources
+resources:
+  payments:
+    methods:
+      charge: post /payments/cards/charge
+      auth: post /payments/cards/auth
+      post3ds: post /payments/cards/post3ds
+      confirm: post /payments/confirm
+      void: post /payments/void
+      refund: post /payments/refund
+
+settings:
+  # All generated integration tests that hit the prism mock http server are marked
+  # as skipped. Removing this setting or setting it to false enables tests, but
+  # doing so may result in test failures due to bugs in the test server.
+  #
+  # [prism mock http server]: https://stoplight.io/open-source/prism
+  disable_mock_tests: true
+  license: Apache-2.0
+
+# `client_settings` define settings for the API client, such as extra constructor
+# arguments (used for authentication), retry behavior, idempotency, etc.
+client_settings:
+  opts:
+    public_id:
+      type: string
+      auth:
+        security_scheme: basic
+        name: username
+      read_env: CLOUDPAYMENTS_PUBLIC_ID
+    api_secret:
+      type: string
+      auth:
+        security_scheme: basic
+        name: password
+      read_env: CLOUDPAYMENTS_API_SECRET
+
+# `query_settings` determines how complex queries (nested objects, arrays) are
+# serialized.
+query_settings:
+  nested_format: brackets
+  array_format: comma
+
+# `readme` is used to configure the code snippets that will be rendered in the
+# README.md of various SDKs. In particular, you can change the `headline`
+# snippet's endpoint and the arguments to call it with.
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: post /payments/cards/charge
+      params:
+        Amount: 100
+        Currency: RUB
+        IpAddress: "127.0.0.1"
+        CardCryptogramPacket: "cryptogram_data"
+    headline:
+      type: request
+      endpoint: post /payments/cards/charge
+      params:
+        Amount: 100
+        Currency: RUB
+        IpAddress: "127.0.0.1"
+        CardCryptogramPacket: "cryptogram_data"
+        Description: "Оплата заказа"
+    charge:
+      type: request
+      endpoint: post /payments/cards/charge
+      params:
+        Amount: 100
+        Currency: RUB
+        IpAddress: "127.0.0.1"
+        CardCryptogramPacket: "cryptogram_data"
+        Description: "Оплата заказа"
+    auth:
+      type: request
+      endpoint: post /payments/cards/auth
+      params:
+        Amount: 100
+        Currency: RUB
+        IpAddress: "127.0.0.1"
+        CardCryptogramPacket: "cryptogram_data"
+        Description: "Авторизация платежа"
+    post3ds:
+      type: request
+      endpoint: post /payments/cards/post3ds
+      params:
+        TransactionId: 123456789
+        PaRes: "eJxVUdtugkAQ..."
+    confirm:
+      type: request
+      endpoint: post /payments/confirm
+      params:
+        TransactionId: 123456789
+        Amount: 100
+    void:
+      type: request
+      endpoint: post /payments/void
+      params:
+        TransactionId: 123456789
+    refund:
+      type: request
+      endpoint: post /payments/refund
+      params:
+        TransactionId: 123456789
+        Amount: 50

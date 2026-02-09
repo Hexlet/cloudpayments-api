@@ -1,0 +1,10 @@
+{
+  "project": "cloudpayments",
+  "openapi_spec": "../tsp-output/schema/openapi.1.0.0.yaml",
+  "stainless_config": "stainless.yml",
+  "targets": {
+    "ruby": {
+      "output_path": "../sdks/cloudpayments-ruby"
+    }
+  }
+}
