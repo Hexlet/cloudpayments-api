@@ -1,0 +1,753 @@
+openapi: 3.1.0
+info:
+  title: CloudPayments API
+  description: API платежного шлюза CloudPayments для приема платежей по криптограмме
+  version: 1.0.0
+tags:
+  - name: Payments
+paths:
+  /payments/cards/auth:
+    post:
+      operationId: Cards_auth
+      summary: Двухстадийная оплата по криптограмме
+      description: |-
+        Двухстадийная оплата по криптограмме
+
+        Выполняет только авторизацию (холдирование средств).
+        Для списания необходимо вызвать метод confirm.
+        При необходимости 3-D Secure аутентификации возвращает данные для перенаправления на ACS.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    required:
+                      - Success
+                    properties:
+                      Success:
+                        type: boolean
+                        description: Результат выполнения запроса
+                      Message:
+                        type: string
+                        description: Описание ошибки (при наличии)
+                      Model:
+                        allOf:
+                          - $ref: '#/components/schemas/TransactionModel'
+                        description: Данные ответа
+                    description: Базовый ответ API
+                  - type: object
+                    required:
+                      - Success
+                    properties:
+                      Success:
+                        type: boolean
+                        description: Результат выполнения запроса
+                      Message:
+                        type: string
+                        description: Описание ошибки (при наличии)
+                      Model:
+                        allOf:
+                          - $ref: '#/components/schemas/ThreeDsRequiredModel'
+                        description: Данные ответа
+                    description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CryptogramPaymentRequest'
+  /payments/cards/charge:
+    post:
+      operationId: Cards_charge
+      summary: Одностадийная оплата по криптограмме
+      description: |-
+        Одностадийная оплата по криптограмме
+
+        Выполняет оплату в одну стадию - авторизация и списание происходят одновременно.
+        При необходимости 3-D Secure аутентификации возвращает данные для перенаправления на ACS.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    required:
+                      - Success
+                    properties:
+                      Success:
+                        type: boolean
+                        description: Результат выполнения запроса
+                      Message:
+                        type: string
+                        description: Описание ошибки (при наличии)
+                      Model:
+                        allOf:
+                          - $ref: '#/components/schemas/TransactionModel'
+                        description: Данные ответа
+                    description: Базовый ответ API
+                  - type: object
+                    required:
+                      - Success
+                    properties:
+                      Success:
+                        type: boolean
+                        description: Результат выполнения запроса
+                      Message:
+                        type: string
+                        description: Описание ошибки (при наличии)
+                      Model:
+                        allOf:
+                          - $ref: '#/components/schemas/ThreeDsRequiredModel'
+                        description: Данные ответа
+                    description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CryptogramPaymentRequest'
+  /payments/cards/post3ds:
+    post:
+      operationId: Cards_post3ds
+      summary: Завершение 3-D Secure аутентификации
+      description: |-
+        Завершение 3-D Secure аутентификации
+
+        Вызывается после возврата плательщика с ACS.
+        Параметр TransactionId соответствует MD, PaRes получается от ACS.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/TransactionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post3dsRequest'
+  /payments/confirm:
+    post:
+      operationId: Payments_confirm
+      summary: Подтверждение двухстадийного платежа
+      description: |-
+        Подтверждение двухстадийного платежа
+
+        Подтверждает ранее авторизованный платеж и инициирует списание средств.
+        Сумма подтверждения может быть меньше или равна сумме авторизации.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+  /payments/refund:
+    post:
+      operationId: Payments_refund
+      summary: Возврат средств
+      description: |-
+        Возврат средств
+
+        Возвращает средства по завершенному платежу.
+        Сумма возврата может быть меньше или равна сумме платежа.
+        Возможны частичные возвраты.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/RefundModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+  /payments/void:
+    post:
+      operationId: Payments_voidPayment
+      summary: Отмена платежа
+      description: |-
+        Отмена платежа
+
+        Отменяет авторизованный платеж до его подтверждения.
+        Применимо только для двухстадийных платежей.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoidRequest'
+components:
+  schemas:
+    CardType:
+      type: string
+      enum:
+        - Visa
+        - MasterCard
+        - Maestro
+        - MIR
+      description: Тип карты
+    CardTypeCode:
+      type: number
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+      description: Код типа карты
+    ConfirmRequest:
+      type: object
+      required:
+        - TransactionId
+        - Amount
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции
+        Amount:
+          type: number
+          format: double
+          description: Сумма подтверждения
+        JsonData:
+          type: object
+          unevaluatedProperties: {}
+          description: Дополнительные данные (JSON)
+      description: Запрос на подтверждение двухстадийного платежа
+    CryptogramPaymentRequest:
+      type: object
+      required:
+        - Amount
+        - IpAddress
+        - CardCryptogramPacket
+      properties:
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа (до 2 знаков после точки)
+        Currency:
+          type: string
+          description: Валюта (RUB по умолчанию)
+        IpAddress:
+          type: string
+          description: IP-адрес плательщика
+        CardCryptogramPacket:
+          type: string
+          description: Криптограмма платежных данных
+        Name:
+          type: string
+          description: Имя держателя карты (латиница)
+        PaymentUrl:
+          type: string
+          description: URL сайта, с которого выполняется оплата
+        InvoiceId:
+          type: string
+          description: Номер заказа
+        Description:
+          type: string
+          description: Описание платежа
+        CultureName:
+          type: string
+          description: Язык уведомлений (ru-RU, en-US)
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        Email:
+          type: string
+          description: Email плательщика
+        Payer:
+          allOf:
+            - $ref: '#/components/schemas/Payer'
+          description: Информация о плательщике
+        JsonData:
+          type: object
+          unevaluatedProperties: {}
+          description: Дополнительные данные (JSON)
+        SaveCard:
+          type: boolean
+          description: Сохранить токен карты для повторных платежей
+      description: Запрос на оплату по криптограмме
+    CultureName:
+      type: string
+      enum:
+        - ru-RU
+        - en-US
+      description: Язык уведомлений
+    Currency:
+      type: string
+      enum:
+        - RUB
+        - USD
+        - EUR
+        - GBP
+      description: Валюта платежа
+    EmptyResponse:
+      type: object
+      required:
+        - Success
+      properties:
+        Success:
+          type: boolean
+          description: Результат выполнения запроса
+        Message:
+          type: string
+          description: Описание ошибки (при наличии)
+      description: Пустой ответ API (только Success и Message)
+    Payer:
+      type: object
+      properties:
+        FirstName:
+          type: string
+          description: Имя
+        LastName:
+          type: string
+          description: Фамилия
+        MiddleName:
+          type: string
+          description: Отчество
+        Birth:
+          type: string
+          description: Дата рождения (YYYY-MM-DD)
+        Street:
+          type: string
+          description: Улица
+        Address:
+          type: string
+          description: Адрес
+        City:
+          type: string
+          description: Город
+        Country:
+          type: string
+          description: Страна (код ISO)
+        Phone:
+          type: string
+          description: Телефон
+        Postcode:
+          type: string
+          description: Почтовый индекс
+      description: Информация о плательщике
+    Post3dsRequest:
+      type: object
+      required:
+        - TransactionId
+        - PaRes
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции (значение параметра MD)
+        PaRes:
+          type: string
+          description: Результат 3-D Secure аутентификации
+      description: Запрос на завершение 3-D Secure аутентификации
+    RefundModel:
+      type: object
+      required:
+        - TransactionId
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции возврата
+      description: Модель для ответа refund
+    RefundRequest:
+      type: object
+      required:
+        - TransactionId
+        - Amount
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции оплаты
+        Amount:
+          type: number
+          format: double
+          description: Сумма возврата
+        JsonData:
+          type: object
+          unevaluatedProperties: {}
+          description: Дополнительные данные (JSON)
+      description: Запрос на возврат средств
+    StatusCode:
+      type: number
+      enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+      description: Статус транзакции (код)
+    ThreeDsRequiredModel:
+      type: object
+      required:
+        - TransactionId
+        - PaReq
+        - AcsUrl
+        - IFrameIsAllowed
+        - ThreeDsCallbackId
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции (используется как MD)
+        PaReq:
+          type: string
+          description: Параметр PaReq для ACS
+        GoReq:
+          type: string
+          description: Параметр GoReq (опционально)
+        AcsUrl:
+          type: string
+          description: URL сервера аутентификации (ACS)
+        ThreeDsSessionData:
+          type: string
+          description: Данные сессии 3DS
+        IFrameIsAllowed:
+          type: boolean
+          description: Разрешено ли использовать iframe
+        FrameWidth:
+          type: integer
+          format: int32
+          description: Ширина фрейма
+        FrameHeight:
+          type: integer
+          format: int32
+          description: Высота фрейма
+        ThreeDsCallbackId:
+          type: string
+          description: ID callback для 3DS
+        EscrowAccumulationId:
+          type: string
+          description: ID накопления для безопасной сделки
+      description: Модель ответа, требующего 3-D Secure аутентификацию
+    TransactionModel:
+      type: object
+      required:
+        - ReasonCode
+        - PublicId
+        - TerminalUrl
+        - TransactionId
+        - Amount
+        - Currency
+        - CurrencyCode
+        - PaymentAmount
+        - PaymentCurrency
+        - PaymentCurrencyCode
+        - CreatedDate
+        - CreatedDateIso
+        - TestMode
+        - IpAddress
+        - IpCountry
+        - CardFirstSix
+        - CardLastFour
+        - CardExpDate
+        - CardType
+        - IssuerBankCountry
+        - Issuer
+        - CardTypeCode
+        - Status
+        - StatusCode
+        - CultureName
+        - Reason
+        - CardHolderMessage
+        - Type
+        - Refunded
+        - GatewayName
+        - AndroidPay
+        - WalletType
+        - TotalFee
+      properties:
+        ReasonCode:
+          type: integer
+          format: int32
+          description: Код причины отклонения (0 = успех)
+        PublicId:
+          type: string
+          description: Public ID терминала
+        TerminalUrl:
+          type: string
+          description: URL терминала
+        TransactionId:
+          type: integer
+          format: int64
+          description: Номер транзакции
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        Currency:
+          type: string
+          description: Валюта платежа
+        CurrencyCode:
+          type: integer
+          format: int32
+          description: Код валюты
+        PaymentAmount:
+          type: number
+          format: double
+          description: Сумма платежа в валюте оплаты
+        PaymentCurrency:
+          type: string
+          description: Валюта оплаты
+        PaymentCurrencyCode:
+          type: integer
+          format: int32
+          description: Код валюты оплаты
+        InvoiceId:
+          type: string
+          description: Номер заказа
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        Email:
+          type: string
+          description: Email плательщика
+        Description:
+          type: string
+          description: Описание платежа
+        JsonData:
+          type: string
+          description: Дополнительные данные JSON
+        CreatedDate:
+          type: string
+          description: Дата создания (формат /Date(...)/)
+        PayoutDate:
+          type: string
+          description: Дата выплаты
+        PayoutDateIso:
+          type: string
+          description: Дата выплаты ISO
+        PayoutAmount:
+          type: number
+          format: double
+          description: Сумма выплаты
+        CreatedDateIso:
+          type: string
+          description: Дата создания ISO
+        AuthDate:
+          type: string
+          description: Дата авторизации
+        AuthDateIso:
+          type: string
+          description: Дата авторизации ISO
+        ConfirmDate:
+          type: string
+          description: Дата подтверждения
+        ConfirmDateIso:
+          type: string
+          description: Дата подтверждения ISO
+        AuthCode:
+          type: string
+          description: Код авторизации
+        TestMode:
+          type: boolean
+          description: Режим тестирования
+        Rrn:
+          type: string
+          description: Retrieval Reference Number
+        OriginalTransactionId:
+          type: integer
+          format: int64
+          description: ID оригинальной транзакции
+        FallBackScenarioDeclinedTransactionId:
+          type: integer
+          format: int64
+          description: ID отклоненной транзакции fallback сценария
+        IpAddress:
+          type: string
+          description: IP-адрес плательщика
+        IpCountry:
+          type: string
+          description: Страна по IP
+        IpCity:
+          type: string
+          description: Город по IP
+        IpRegion:
+          type: string
+          description: Регион по IP
+        IpDistrict:
+          type: string
+          description: Округ по IP
+        IpLatitude:
+          type: number
+          format: double
+          description: Широта по IP
+        IpLongitude:
+          type: number
+          format: double
+          description: Долгота по IP
+        CardFirstSix:
+          type: string
+          description: Первые 6 цифр карты
+        CardLastFour:
+          type: string
+          description: Последние 4 цифры карты
+        CardExpDate:
+          type: string
+          description: Срок действия карты
+        CardType:
+          type: string
+          description: Тип карты (Visa, MasterCard, etc.)
+        CardProduct:
+          type: string
+          description: Продукт карты
+        CardCategory:
+          type: string
+          description: Категория карты
+        EscrowAccumulationId:
+          type: string
+          description: ID накопления для безопасной сделки
+        IssuerBankCountry:
+          type: string
+          description: Страна банка-эмитента
+        Issuer:
+          type: string
+          description: Банк-эмитент
+        CardTypeCode:
+          type: integer
+          format: int32
+          description: Код типа карты
+        Status:
+          type: string
+          description: Статус транзакции (текст)
+        StatusCode:
+          type: integer
+          format: int32
+          description: Код статуса транзакции
+        CultureName:
+          type: string
+          description: Язык
+        Reason:
+          type: string
+          description: Причина (текст)
+        CardHolderMessage:
+          type: string
+          description: Сообщение для держателя карты
+        Type:
+          type: integer
+          format: int32
+          description: Тип операции
+        Refunded:
+          type: boolean
+          description: Признак возврата
+        Name:
+          type: string
+          description: Имя держателя карты
+        Token:
+          type: string
+          description: Токен карты для повторных платежей
+        SubscriptionId:
+          type: string
+          description: ID подписки
+        GatewayName:
+          type: string
+          description: Имя шлюза
+        AndroidPay:
+          type: boolean
+          description: Признак Android Pay
+        WalletType:
+          type: string
+          description: Тип кошелька
+        TotalFee:
+          type: number
+          format: double
+          description: Общая комиссия
+      description: Модель транзакции в ответе API
+    TransactionStatus:
+      type: string
+      enum:
+        - AwaitingAuthentication
+        - Authorized
+        - Completed
+        - Cancelled
+        - Declined
+      description: Статус транзакции (текст)
+    Versions:
+      type: string
+      enum:
+        - 1.0.0
+    VoidRequest:
+      type: object
+      required:
+        - TransactionId
+      properties:
+        TransactionId:
+          type: integer
+          format: int64
+          description: ID транзакции
+      description: Запрос на отмену платежа
+servers:
+  - url: https://api.cloudpayments.ru
+    description: Production API
+    variables: {}
