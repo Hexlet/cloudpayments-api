@@ -66,9 +66,6 @@ settings:
   disable_mock_tests: true
   license: Apache-2.0
 
-security:
-  - BasicAuth: []
-
 # `client_settings` define settings for the API client, such as extra constructor
 # arguments (used for authentication), retry behavior, idempotency, etc.
 client_settings:
