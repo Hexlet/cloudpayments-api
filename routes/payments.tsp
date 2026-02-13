@@ -6,6 +6,7 @@ import "../models/base.tsp";
 import "../models/transaction.tsp";
 import "../models/threeds.tsp";
 import "../models/requests.tsp";
+import "../models/token_payment.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.Rest;
@@ -95,4 +96,29 @@ namespace Payments {
   @route("/refund")
   @summary("Возврат средств")
   op refund(@body request: RefundRequest): RefundResponse;
+
+  @route("/tokens")
+  namespace Tokens {
+    /**
+     * Одностадийная оплата по токену (рекарринг)
+     *
+     * Выполняет оплату в одну стадию по сохранённому токену карты.
+     * Токен выдаётся системой после первой оплаты по криптограмме.
+     */
+    @post
+    @route("/charge")
+    @summary("Одностадийная оплата по токену")
+    op charge(@body request: TokenPaymentRequest): TransactionResponse;
+
+    /**
+     * Двухстадийная оплата по токену (рекарринг)
+     *
+     * Выполняет авторизацию (холдирование средств) по сохранённому токену карты.
+     * Для списания необходимо вызвать метод confirm.
+     */
+    @post
+    @route("/auth")
+    @summary("Двухстадийная оплата по токену")
+    op auth(@body request: TokenPaymentRequest): TransactionResponse;
+  }
 }

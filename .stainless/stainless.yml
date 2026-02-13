@@ -54,6 +54,22 @@ resources:
       confirm: post /payments/confirm
       void: post /payments/void
       refund: post /payments/refund
+    resources:
+      tokens:
+        methods:
+          charge: post /payments/tokens/charge
+          auth: post /payments/tokens/auth
+  subscriptions:
+    methods:
+      create: post /subscriptions/create
+      get: post /subscriptions/get
+      find: post /subscriptions/find
+      update: post /subscriptions/update
+      cancel: post /subscriptions/cancel
+  orders:
+    methods:
+      create: post /orders/create
+      cancel: post /orders/cancel
   models:
     TransactionModel: TransactionModel
 
@@ -152,3 +168,76 @@ readme:
       params:
         TransactionId: 123456789
         Amount: 50
+    token_charge:
+      type: request
+      endpoint: post /payments/tokens/charge
+      params:
+        Amount: 59
+        Currency: RUB
+        AccountId: "user_x"
+        Token: "success_1111a3e0-2428-48fb-a530-12815d90d0e8"
+        TrInitiatorCode: 0
+        PaymentScheduled: 1
+        Description: "Оплата товаров в example.com"
+    token_auth:
+      type: request
+      endpoint: post /payments/tokens/auth
+      params:
+        Amount: 59
+        Currency: RUB
+        AccountId: "user_x"
+        Token: "success_1111a3e0-2428-48fb-a530-12815d90d0e8"
+        TrInitiatorCode: 1
+        Description: "Авторизация по токену"
+    subscription_create:
+      type: request
+      endpoint: post /subscriptions/create
+      params:
+        Token: "477BBA133C182267FE5F086924ABDC5DB71F77BFC27F01F2843F2CDC69D89F05"
+        AccountId: "user_x"
+        Description: "Ежемесячная подписка на сервис example.com"
+        Email: "user@example.com"
+        Amount: 399
+        Currency: RUB
+        RequireConfirmation: false
+        StartDate: "2025-11-02T21:00:00Z"
+        Interval: Month
+        Period: 1
+    subscription_get:
+      type: request
+      endpoint: post /subscriptions/get
+      params:
+        Id: "sc_8cf8a9338fb8ebf7202b08d09c938"
+    subscription_find:
+      type: request
+      endpoint: post /subscriptions/find
+      params:
+        AccountId: "user_x"
+    subscription_update:
+      type: request
+      endpoint: post /subscriptions/update
+      params:
+        Id: "sc_3ffc96c001e152b341817341b075a"
+        Description: "Обновлённая подписка"
+        Amount: 499
+        Currency: RUB
+    subscription_cancel:
+      type: request
+      endpoint: post /subscriptions/cancel
+      params:
+        Id: "sc_cc673fdc50b3577e60eee9081e440"
+    order_create:
+      type: request
+      endpoint: post /orders/create
+      params:
+        Amount: 10.0
+        Currency: RUB
+        Description: "Оплата на сайте example.com"
+        Email: "client@test.local"
+        RequireConfirmation: true
+        SendEmail: false
+    order_cancel:
+      type: request
+      endpoint: post /orders/cancel
+      params:
+        Id: "gASGZVgUN21hcpPF"

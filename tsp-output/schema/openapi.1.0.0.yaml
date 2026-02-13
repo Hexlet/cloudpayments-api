@@ -5,7 +5,72 @@ info:
   version: 1.0.0
 tags:
   - name: Payments
+  - name: Subscriptions
+  - name: Orders
 paths:
+  /orders/cancel:
+    post:
+      operationId: Orders_cancel
+      summary: Отмена созданного счёта
+      description: |-
+        Отмена созданного счёта
+
+        Отменяет ранее созданный счёт. После отмены оплата по ссылке невозможна.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCancelRequest'
+  /orders/create:
+    post:
+      operationId: Orders_create
+      summary: Создание счёта для отправки по почте
+      description: |-
+        Создание счёта для отправки по почте
+
+        Создаёт ссылку на оплату и при необходимости отправляет уведомление
+        плательщику по email, SMS или Viber.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/OrderModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
   /payments/cards/auth:
     post:
       operationId: Cards_auth
@@ -221,6 +286,84 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RefundRequest'
+  /payments/tokens/auth:
+    post:
+      operationId: Tokens_auth
+      summary: Двухстадийная оплата по токену
+      description: |-
+        Двухстадийная оплата по токену (рекарринг)
+
+        Выполняет авторизацию (холдирование средств) по сохранённому токену карты.
+        Для списания необходимо вызвать метод confirm.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/TransactionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenPaymentRequest'
+  /payments/tokens/charge:
+    post:
+      operationId: Tokens_charge
+      summary: Одностадийная оплата по токену
+      description: |-
+        Одностадийная оплата по токену (рекарринг)
+
+        Выполняет оплату в одну стадию по сохранённому токену карты.
+        Токен выдаётся системой после первой оплаты по криптограмме.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/TransactionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenPaymentRequest'
   /payments/void:
     post:
       operationId: Payments_voidPayment
@@ -246,6 +389,186 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/VoidRequest'
+  /subscriptions/cancel:
+    post:
+      operationId: Subscriptions_cancel
+      summary: Отмена подписки на рекуррентные платежи
+      description: |-
+        Отмена подписки на рекуррентные платежи
+
+        Отменяет активную подписку. Дальнейшие автоматические списания прекращаются.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyResponse'
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionCancelRequest'
+  /subscriptions/create:
+    post:
+      operationId: Subscriptions_create
+      summary: Создание подписки на рекуррентные платежи
+      description: |-
+        Создание подписки на рекуррентные платежи
+
+        Создаёт план подписки для автоматического списания средств
+        по указанному расписанию с использованием токена карты.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/SubscriptionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionCreateRequest'
+  /subscriptions/find:
+    post:
+      operationId: Subscriptions_find
+      summary: Поиск подписок
+      description: |-
+        Поиск подписок
+
+        Возвращает список подписок для указанного пользователя.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscriptionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionFindRequest'
+  /subscriptions/get:
+    post:
+      operationId: Subscriptions_get
+      summary: Запрос информации о подписке
+      description: |-
+        Запрос информации о подписке
+
+        Возвращает текущий статус и параметры подписки.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/SubscriptionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionGetRequest'
+  /subscriptions/update:
+    post:
+      operationId: Subscriptions_update
+      summary: Изменение подписки на рекуррентные платежи
+      description: |-
+        Изменение подписки на рекуррентные платежи
+
+        Изменяет параметры существующей подписки.
+        Если подписка была отменена или завершена, изменение любого атрибута
+        приведёт к её реактивации.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - Success
+                properties:
+                  Success:
+                    type: boolean
+                    description: Результат выполнения запроса
+                  Message:
+                    type: string
+                    description: Описание ошибки (при наличии)
+                  Model:
+                    allOf:
+                      - $ref: '#/components/schemas/SubscriptionModel'
+                    description: Данные ответа
+                description: Базовый ответ API
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUpdateRequest'
 security:
   - BasicAuth: []
 components:
@@ -364,6 +687,153 @@ components:
           type: string
           description: Описание ошибки (при наличии)
       description: Пустой ответ API (только Success и Message)
+    OrderCancelRequest:
+      type: object
+      required:
+        - Id
+      properties:
+        Id:
+          type: string
+          description: Идентификатор заказа
+      description: Запрос на отмену заказа (счёта)
+    OrderCreateRequest:
+      type: object
+      required:
+        - Amount
+        - Description
+      properties:
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        Currency:
+          type: string
+          description: Валюта (RUB по умолчанию)
+        Description:
+          type: string
+          description: Описание платежа
+        Email:
+          type: string
+          description: Email плательщика
+        RequireConfirmation:
+          type: boolean
+          description: Требуется подтверждение (двухстадийная схема)
+        SendEmail:
+          type: boolean
+          description: Отправить ссылку на email
+        InvoiceId:
+          type: string
+          description: Номер заказа в системе мерчанта
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        OfferUri:
+          type: string
+          description: Ссылка на оферту
+        Phone:
+          type: string
+          description: Телефон плательщика
+        SendSms:
+          type: boolean
+          description: Отправить ссылку по SMS
+        SendViber:
+          type: boolean
+          description: Отправить ссылку через Viber
+        CultureName:
+          type: string
+          description: Язык уведомлений (ru-RU, en-US)
+        SubscriptionBehavior:
+          type: string
+          description: 'Поведение подписки: CreateWeekly, CreateMonthly'
+        SuccessRedirectUrl:
+          type: string
+          description: URL редиректа при успешной оплате
+        FailRedirectUrl:
+          type: string
+          description: URL редиректа при неуспешной оплате
+        JsonData:
+          type: object
+          unevaluatedProperties: {}
+          description: Дополнительные данные (JSON)
+      description: Запрос на создание заказа (счёта)
+    OrderModel:
+      type: object
+      required:
+        - Id
+        - Number
+        - Amount
+        - Currency
+        - CurrencyCode
+        - Description
+        - RequireConfirmation
+        - Url
+        - CultureName
+        - CreatedDate
+        - CreatedDateIso
+        - StatusCode
+        - Status
+        - InternalId
+      properties:
+        Id:
+          type: string
+          description: Идентификатор заказа
+        Number:
+          type: integer
+          format: int32
+          description: Номер заказа
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        Currency:
+          type: string
+          description: Валюта
+        CurrencyCode:
+          type: integer
+          format: int32
+          description: Код валюты
+        Email:
+          type: string
+          description: Email плательщика
+        Phone:
+          type: string
+          description: Телефон плательщика
+        Description:
+          type: string
+          description: Описание платежа
+        RequireConfirmation:
+          type: boolean
+          description: Требуется подтверждение (двухстадийная схема)
+        Url:
+          type: string
+          description: Ссылка на оплату
+        CultureName:
+          type: string
+          description: Язык
+        CreatedDate:
+          type: string
+          description: Дата создания (формат /Date(...)/)
+        CreatedDateIso:
+          type: string
+          description: Дата создания ISO
+        PaymentDate:
+          type: string
+          description: Дата оплаты
+        PaymentDateIso:
+          type: string
+          description: Дата оплаты ISO
+        StatusCode:
+          type: integer
+          format: int32
+          description: Код статуса
+        Status:
+          type: string
+          description: Статус
+        InternalId:
+          type: integer
+          format: int32
+          description: Внутренний ID
+      description: Модель заказа (счёта)
     Payer:
       type: object
       properties:
@@ -450,6 +920,244 @@ components:
         - 4
         - 5
       description: Статус транзакции (код)
+    SubscriptionCancelRequest:
+      type: object
+      required:
+        - Id
+      properties:
+        Id:
+          type: string
+          description: Идентификатор подписки
+      description: Запрос на отмену подписки
+    SubscriptionCreateRequest:
+      type: object
+      required:
+        - Token
+        - AccountId
+        - Description
+        - Amount
+        - Currency
+        - RequireConfirmation
+        - StartDate
+        - Interval
+        - Period
+      properties:
+        Token:
+          type: string
+          description: Токен карты
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        Description:
+          type: string
+          description: Описание платежа
+        Email:
+          type: string
+          description: Email плательщика
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        Currency:
+          type: string
+          description: Валюта
+        RequireConfirmation:
+          type: boolean
+          description: Требуется подтверждение (двухстадийная схема)
+        StartDate:
+          type: string
+          format: date-time
+          description: Дата и время первого платежа (UTC)
+        Interval:
+          type: string
+          description: 'Интервал: Day, Week, Month'
+        Period:
+          type: integer
+          format: int32
+          description: Период (в сочетании с Interval)
+        MaxPeriods:
+          type: integer
+          format: int32
+          description: Максимальное количество платежей
+        CustomerReceipt:
+          type: object
+          unevaluatedProperties: {}
+          description: Данные для онлайн-чека
+      description: Запрос на создание подписки
+    SubscriptionFindRequest:
+      type: object
+      required:
+        - AccountId
+      properties:
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+      description: Запрос поиска подписок
+    SubscriptionGetRequest:
+      type: object
+      required:
+        - Id
+      properties:
+        Id:
+          type: string
+          description: Идентификатор подписки
+      description: Запрос информации о подписке
+    SubscriptionInterval:
+      type: string
+      enum:
+        - Day
+        - Week
+        - Month
+      description: Интервал подписки
+    SubscriptionModel:
+      type: object
+      required:
+        - Id
+        - AccountId
+        - Amount
+        - CurrencyCode
+        - Currency
+        - RequireConfirmation
+        - StartDate
+        - StartDateIso
+        - IntervalCode
+        - Interval
+        - Period
+        - CultureName
+        - StatusCode
+        - Status
+        - SuccessfulTransactionsNumber
+        - FailedTransactionsNumber
+      properties:
+        Id:
+          type: string
+          description: Идентификатор подписки
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        Description:
+          type: string
+          description: Описание платежа
+        Email:
+          type: string
+          description: Email плательщика
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        CurrencyCode:
+          type: integer
+          format: int32
+          description: Код валюты
+        Currency:
+          type: string
+          description: Валюта
+        RequireConfirmation:
+          type: boolean
+          description: Требуется подтверждение (двухстадийная схема)
+        StartDate:
+          type: string
+          description: Дата начала (формат /Date(...)/)
+        StartDateIso:
+          type: string
+          description: Дата начала ISO
+        IntervalCode:
+          type: integer
+          format: int32
+          description: Код интервала
+        Interval:
+          type: string
+          description: Интервал
+        Period:
+          type: integer
+          format: int32
+          description: Период
+        MaxPeriods:
+          type: integer
+          format: int32
+          description: Максимальное количество платежей
+        CultureName:
+          type: string
+          description: Язык
+        StatusCode:
+          type: integer
+          format: int32
+          description: Код статуса
+        Status:
+          type: string
+          description: Статус
+        SuccessfulTransactionsNumber:
+          type: integer
+          format: int32
+          description: Количество успешных транзакций
+        FailedTransactionsNumber:
+          type: integer
+          format: int32
+          description: Количество неуспешных транзакций
+        LastTransactionDate:
+          type: string
+          description: Дата последней транзакции
+        LastTransactionDateIso:
+          type: string
+          description: Дата последней транзакции ISO
+        NextTransactionDate:
+          type: string
+          description: Дата следующей транзакции
+        NextTransactionDateIso:
+          type: string
+          description: Дата следующей транзакции ISO
+        Receipt:
+          type: object
+          unevaluatedProperties: {}
+          description: Данные чека
+        FailoverSchemeId:
+          type: string
+          description: ID схемы фейловера
+      description: Модель подписки на рекуррентные платежи
+    SubscriptionUpdateRequest:
+      type: object
+      required:
+        - Id
+      properties:
+        Id:
+          type: string
+          description: Идентификатор подписки
+        Description:
+          type: string
+          description: Описание платежа
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа
+        Currency:
+          type: string
+          description: Валюта
+        RequireConfirmation:
+          type: boolean
+          description: Требуется подтверждение
+        StartDate:
+          type: string
+          format: date-time
+          description: Дата и время следующего платежа (UTC)
+        Interval:
+          type: string
+          description: 'Интервал: Day, Week, Month'
+        Period:
+          type: integer
+          format: int32
+          description: Период
+        MaxPeriods:
+          type: integer
+          format: int32
+          description: Максимальное количество платежей
+        CustomerReceipt:
+          type: object
+          unevaluatedProperties: {}
+          description: Данные для онлайн-чека
+        CultureName:
+          type: string
+          description: Язык уведомлений (ru-RU, en-US)
+      description: Запрос на изменение подписки
     ThreeDsRequiredModel:
       type: object
       required:
@@ -493,6 +1201,56 @@ components:
           type: string
           description: ID накопления для безопасной сделки
       description: Модель ответа, требующего 3-D Secure аутентификацию
+    TokenPaymentRequest:
+      type: object
+      required:
+        - Amount
+        - AccountId
+        - TrInitiatorCode
+        - Token
+      properties:
+        Amount:
+          type: number
+          format: double
+          description: Сумма платежа (до 2 знаков после точки)
+        Currency:
+          type: string
+          description: Валюта (RUB по умолчанию)
+        AccountId:
+          type: string
+          description: Идентификатор пользователя
+        TrInitiatorCode:
+          type: integer
+          format: int32
+          description: 'Признак инициатора транзакции: 0 — мерчант, 1 — держатель карты'
+        PaymentScheduled:
+          type: integer
+          format: int32
+          description: 'Признак регулярного платежа: 0 — нет, 1 — да'
+        Token:
+          type: string
+          description: Токен карты
+        InvoiceId:
+          type: string
+          description: Номер заказа
+        Description:
+          type: string
+          description: Описание платежа
+        IpAddress:
+          type: string
+          description: IP-адрес плательщика
+        Email:
+          type: string
+          description: Email плательщика
+        Payer:
+          allOf:
+            - $ref: '#/components/schemas/Payer'
+          description: Информация о плательщике
+        JsonData:
+          type: object
+          unevaluatedProperties: {}
+          description: Дополнительные данные (JSON)
+      description: Запрос на оплату по токену (рекарринг)
     TransactionModel:
       type: object
       required:

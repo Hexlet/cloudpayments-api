@@ -5,6 +5,8 @@ import "@typespec/openapi3";
 import "@typespec/versioning";
 
 import "./routes/payments.tsp";
+import "./routes/subscriptions.tsp";
+import "./routes/orders.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
