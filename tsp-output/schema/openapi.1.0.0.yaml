@@ -569,8 +569,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SubscriptionUpdateRequest'
-security:
-  - BasicAuth: []
 components:
   schemas:
     CardType:
@@ -1507,10 +1505,6 @@ components:
           format: int64
           description: ID транзакции
       description: Запрос на отмену платежа
-  securitySchemes:
-    BasicAuth:
-      type: http
-      scheme: Basic
 servers:
   - url: https://api.cloudpayments.ru
     description: Production API

@@ -18,7 +18,6 @@ using TypeSpec.Versioning;
 @service(#{ title: "CloudPayments API" })
 @versioned(Versions)
 @server("https://api.cloudpayments.ru", "Production API")
-@useAuth(BasicAuth)
 namespace CloudPayments;
 
 enum Versions {

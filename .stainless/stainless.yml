@@ -47,6 +47,8 @@ environments:
 # [configuration guide]: https://www.stainless.com/docs/guides/configure#resources
 resources:
   payments:
+    models:
+      transaction: TransactionModel
     methods:
       charge: post /payments/cards/charge
       auth: post /payments/cards/auth
@@ -54,12 +56,14 @@ resources:
       confirm: post /payments/confirm
       void: post /payments/void
       refund: post /payments/refund
-    resources:
+    subresources:
       tokens:
         methods:
           charge: post /payments/tokens/charge
           auth: post /payments/tokens/auth
   subscriptions:
+    models:
+      subscription: SubscriptionModel
     methods:
       create: post /subscriptions/create
       get: post /subscriptions/get
@@ -70,8 +74,6 @@ resources:
     methods:
       create: post /orders/create
       cancel: post /orders/cancel
-  models:
-    TransactionModel: TransactionModel
 
 settings:
   # All generated integration tests that hit the prism mock http server are marked
@@ -90,14 +92,22 @@ client_settings:
       type: string
       auth:
         security_scheme: BasicAuth
-        name: username
+        role: username
       read_env: CLOUDPAYMENTS_PUBLIC_ID
     api_secret:
       type: string
       auth:
         security_scheme: BasicAuth
-        name: password
+        role: password
       read_env: CLOUDPAYMENTS_API_SECRET
+
+security:
+  - BasicAuth: []
+
+security_schemes:
+  BasicAuth:
+    type: http
+    scheme: basic
 
 # `query_settings` determines how complex queries (nested objects, arrays) are
 # serialized.
