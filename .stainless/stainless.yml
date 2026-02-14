@@ -30,7 +30,7 @@ targets:
   #     pypi: false
   ruby:
     edition: ruby.2025-10-08
-    gem_name: cloudpayments
+    gem_name: cloudpayments-ruby
     production_repo: Hexlet/cloudpayments-ruby
     publish:
       rubygems: false
