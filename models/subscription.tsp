@@ -49,7 +49,7 @@ model SubscriptionModel {
   Period: int32;
 
   /** Максимальное количество платежей */
-  MaxPeriods?: int32;
+  MaxPeriods?: int32 | null;
 
   /** Язык */
   CultureName: string;
