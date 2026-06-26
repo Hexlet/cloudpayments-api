@@ -1071,8 +1071,10 @@ components:
           format: int32
           description: Период
         MaxPeriods:
-          type: integer
-          format: int32
+          anyOf:
+            - type: integer
+              format: int32
+            - type: 'null'
           description: Максимальное количество платежей
         CultureName:
           type: string
